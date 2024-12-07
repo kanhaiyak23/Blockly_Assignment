@@ -1,40 +1,27 @@
-import { useState, useEffect, useCallback } from 'react';
-
+import { useState, useEffect, useCallback } from "react";
 
 export const useVehicleSimulation = (routeData) => {
-  const [vehicleRoute, setVehicleRoute] = useState({
-    locations: routeData,
-    currentIndex: 0,
-  });
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
-    let interval
-    
+    let interval;
     if (isRunning) {
       interval = setInterval(() => {
-        setVehicleRoute((prev) => {
-          const nextIndex = prev.currentIndex + 1;
-          if (nextIndex >= prev.locations.length) {
+        setCurrentIndex((prevIndex) => {
+          if (prevIndex + 1 >= routeData.length) {
             setIsRunning(false);
-            return prev;
+            return prevIndex;
           }
-          return {
-            ...prev,
-            currentIndex: nextIndex,
-          };
+          return prevIndex + 1;
         });
-      }, 2000);
+      }, 2000); 
     }
-
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, routeData]);
 
   const startSimulation = useCallback(() => {
-    setVehicleRoute(prev => ({
-      ...prev,
-      currentIndex: 0
-    }));
+    setCurrentIndex(0);
     setIsRunning(true);
   }, []);
 
@@ -44,16 +31,13 @@ export const useVehicleSimulation = (routeData) => {
 
   const resetSimulation = useCallback(() => {
     setIsRunning(false);
-    setVehicleRoute(prev => ({
-      ...prev,
-      currentIndex: 0
-    }));
+    setCurrentIndex(0);
   }, []);
 
   return {
-    currentLocation: vehicleRoute.locations[vehicleRoute.currentIndex],
-    routePath: vehicleRoute.locations,
-    currentIndex: vehicleRoute.currentIndex,
+    currentLocation: routeData[currentIndex],
+    routePath: routeData,
+    currentIndex,
     isRunning,
     startSimulation,
     stopSimulation,
